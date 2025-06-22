@@ -1,0 +1,20 @@
+{
+  "name": "p5-repair-serverless",
+  "version": "1.0.0",
+  "description": "Serverless HTML validation using existing p5-repair script",
+  "main": "api/validate-html.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel"
+  },
+  "dependencies": {
+    "acorn-loose": "^8.4.0",
+    "axios": "^1.6.0",
+    "dotenv": "^16.5.0",
+    "puppeteer": "^21.6.1",
+    "puppeteer-core": "^21.6.1"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
