@@ -13,6 +13,85 @@ const puppeteer = require('puppeteer');
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 const DEEPSEEK_API_URL = "https://quiddit.ai/api/deepseek/chat/completions";
 
+// At the very top, add error handling
+export default async function handler(req, res) {
+    console.log('Function called with method:', req.method);
+    console.log('Headers:', req.headers);
+    
+    // Set CORS headers FIRST - before any other logic
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS, GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      console.log('Handling OPTIONS preflight request');
+      return res.status(200).end();
+    }
+    
+    if (req.method !== 'POST') {
+      console.log('Invalid method:', req.method);
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+    
+    try {
+      console.log('Request body:', req.body);
+      
+      const { html, validationType } = req.body;
+      
+      if (!html) {
+        return res.status(400).json({ error: 'HTML content is required' });
+      }
+      
+      if (!validationType) {
+        return res.status(400).json({ error: 'Validation type is required' });
+      }
+      
+      console.log('Validation type:', validationType);
+      
+      // For now, let's return a simple success response to test connectivity
+      return res.status(200).json({
+        success: true,
+        message: 'Function is working',
+        validationType: validationType,
+        htmlLength: html.length,
+        errors: [],
+        fixCount: 0
+      });
+      
+      // Comment out the Puppeteer logic for now to isolate the issue
+      /*
+      let result = { errors: [], fixCount: 0 };
+      
+      switch (validationType) {
+        case 'undefined-variables':
+          const undefinedErrors = await detectUndefinedVariableErrors(html);
+          result = {
+            errors: undefinedErrors,
+            fixCount: undefinedErrors.length,
+            type: 'undefined-variables'
+          };
+          break;
+          
+        // ... other cases
+          
+        default:
+          return res.status(400).json({ error: 'Invalid validation type' });
+      }
+      
+      return res.status(200).json(result);
+      */
+    } catch (error) {
+      console.error('Function error:', error);
+      console.error('Error stack:', error.stack);
+      return res.status(500).json({ 
+        error: 'Internal server error', 
+        details: error.message,
+        stack: error.stack
+      });
+    }
+  }
+
 function detectUnbalancedParentheses(source) {
   // Skip detection for shader-heavy content
   if (source.includes('ShaderMaterial') || 
